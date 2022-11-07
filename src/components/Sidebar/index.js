@@ -102,6 +102,7 @@ const Drawer = styled(MuiDrawer, {
 }));
 
 const Sidebar = () => {
+  const [page, setPage] = useState(1);
   const theme = useTheme();
   const [open, setOpen] = useState(true);
   const navigate = useNavigate();
@@ -169,7 +170,7 @@ const Sidebar = () => {
                 width: "100%",
               }}
             >
-              <div>Mini variant drawer</div>
+              <div></div>
 
               <div variant="h6">Sos</div>
 
@@ -284,12 +285,14 @@ const Sidebar = () => {
           <ListItem key={"device"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(1);
                 navigate("/");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 1 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon
@@ -311,12 +314,14 @@ const Sidebar = () => {
           <ListItem key={"news"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(2);
                 navigate("/news");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 2 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon
@@ -335,12 +340,14 @@ const Sidebar = () => {
           <ListItem key={"usres"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(3);
                 navigate("/users");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 3 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon
@@ -359,12 +366,14 @@ const Sidebar = () => {
           <ListItem key={"sos"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(4);
                 navigate("/alerts");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 4 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon
@@ -386,12 +395,14 @@ const Sidebar = () => {
           <ListItem key={"settings"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(5);
                 navigate("/settings");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 5 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon
@@ -413,12 +424,14 @@ const Sidebar = () => {
           <ListItem key={"monitor"} disablePadding sx={{ display: "block" }}>
             <ListItemButton
               onClick={() => {
+                setPage(6);
                 navigate("/monitor");
               }}
               sx={{
                 minHeight: 48,
                 justifyContent: open ? "initial" : "center",
                 px: 2.5,
+                backgroundColor: page === 6 ? "#DCDCDC" : "none",
               }}
             >
               <ListItemIcon

@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { logout } from "../../reducers/userSlice.js";
@@ -25,7 +25,7 @@ import {
   Select,
   TextField,
 } from "@mui/material";
-// import { setLoading } from "../../reducers/loadingSlice.js";
+import { UserContext } from "../../context/UserContext.js";
 
 const MenuProps = {
   PaperProps: {
@@ -47,6 +47,7 @@ const ListDevice = () => {
   const [pageOrdering, setPageOrdering] = useState(0);
   const [status, setStatus] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const { setValue } = useContext(UserContext);
 
   const PageSize = 5;
 
@@ -57,15 +58,22 @@ const ListDevice = () => {
 
   const StatusCircle = (props) => {
     let color =
-      props.status === 1 ? "green" : props.status === 0 ? "red" : "yellow";
+      props.status === 1 ? "green" : props.status === 0 ? "red" : "orange";
     return (
       <div
-        style={{ width: "25px", height: "25px", backgroundColor: color, margin: 'auto', borderRadius: '20px' }}
+        style={{
+          width: "25px",
+          height: "25px",
+          backgroundColor: color,
+          margin: "auto",
+          borderRadius: "20px",
+        }}
       ></div>
     );
   };
 
   const deleteHandler = (id) => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/devices/` + id, {
         headers: {
@@ -84,6 +92,9 @@ const ListDevice = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   };
 
@@ -100,8 +111,8 @@ const ListDevice = () => {
         : status === "inactive"
         ? 0
         : -1;
-    // dispatch(setLoading(true));
     if (searchTerm === "") {
+      setValue(true);
       axios
         .get(
           `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}`,
@@ -124,11 +135,12 @@ const ListDevice = () => {
           }
         })
         .finally(() => {
-          // dispatch(setLoading(false));
+          setValue(false);
         });
     } else {
       const delayDebounceFn = setTimeout(() => {
         setCurrentPage(1);
+        setValue(true);
         axios
           .get(
             `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}&user.email=` +
@@ -151,11 +163,34 @@ const ListDevice = () => {
             }
           })
           .finally(() => {
-            // dispatch(setLoading(false));
+            setValue(false);
           });
       }, 1000);
       return () => clearTimeout(delayDebounceFn);
     }
+    axios
+      .get(
+        `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}`,
+        {
+          headers: {
+            Authorization: "Bearer " + user.token,
+          },
+        }
+      )
+      .then((data) => {
+        setDeviceList(data.data["hydra:member"]);
+        setTotalCount(data.data["hydra:totalItems"]);
+      })
+      .catch((err) => {
+        console.log(err);
+        if (err.response.status === 401) {
+          dispatch(logout());
+          navigate("/login");
+        }
+      })
+      .finally(() => {
+        setValue(false);
+      });
   }, [
     REACT_APP_API_ENDPOINT,
     currentPage,
@@ -165,6 +200,7 @@ const ListDevice = () => {
     pageOrdering,
     status,
     searchTerm,
+    setValue,
   ]);
 
   return (
@@ -194,7 +230,7 @@ const ListDevice = () => {
               size="small"
               id="outlined-basic"
               variant="outlined"
-              placeholder="Email"
+              placeholder="Username"
               onChange={(event) => {
                 setSearchTerm(event.target.value);
               }}
@@ -202,28 +238,30 @@ const ListDevice = () => {
           </div>
           &nbsp; &nbsp;
           <div>
-            <InputLabel id="demo-multiple-checkbox-label">Status</InputLabel>
-            <Select
-              style={{ width: "100px", height: "40px" }}
-              labelId="demo-multiple-checkbox-label"
-              id="demo-multiple-checkbox"
-              value={status}
-              onChange={handleChange}
-              input={<OutlinedInput label="Status" />}
-              MenuProps={MenuProps}
-            >
-              <MenuItem key={1} value={"all"}>
-                <ListItemText primary={"all"} />
-              </MenuItem>
+            <div>
+              <InputLabel id="demo-multiple-checkbox-label">Status</InputLabel>
+              <Select
+                style={{ width: "100px", height: "40px" }}
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
+                value={status}
+                onChange={handleChange}
+                input={<OutlinedInput label="Status" />}
+                MenuProps={MenuProps}
+              >
+                <MenuItem key={1} value={"all"}>
+                  <ListItemText primary={"all"} />
+                </MenuItem>
 
-              <MenuItem key={2} value={"active"}>
-                <ListItemText primary={"active"} />
-              </MenuItem>
+                <MenuItem key={2} value={"active"}>
+                  <ListItemText primary={"active"} />
+                </MenuItem>
 
-              <MenuItem key={3} value={"inactive"}>
-                <ListItemText primary={"inactive"} />
-              </MenuItem>
-            </Select>
+                <MenuItem key={3} value={"inactive"}>
+                  <ListItemText primary={"inactive"} />
+                </MenuItem>
+              </Select>
+            </div>
           </div>
         </div>
       </div>
@@ -237,8 +275,8 @@ const ListDevice = () => {
               <TableCell align="center">name</TableCell>
               <TableCell align="center">type</TableCell>
               <TableCell align="center">created at</TableCell>
-              <TableCell align="center">user name</TableCell>
-              <TableCell align="center">user email</TableCell>
+              <TableCell align="center">full name</TableCell>
+              <TableCell align="center">username</TableCell>
               <TableCell align="center">status</TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
@@ -313,11 +351,11 @@ const ListDevice = () => {
                 <TableCell align="center">
                   <button
                     onClick={() => {
-                      navigate("/history/" + row.id);
+                      navigate("/trace/" + row.id);
                     }}
                     className="btn btn-light"
                   >
-                    Show history
+                    Trace
                   </button>
                 </TableCell>
                 <TableCell align="center">

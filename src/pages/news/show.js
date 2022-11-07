@@ -1,7 +1,7 @@
 import { Box, FormGroup, TextField } from "@mui/material";
 import axios from "axios";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -14,8 +14,13 @@ import "./styles.css";
 
 // import required modules
 import { FreeMode, Pagination } from "swiper";
+import { logout } from "../../reducers/userSlice";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const ShowNews = () => {
+  const { setValue } = useContext(UserContext);
+  const dispatch = useDispatch();
   const { REACT_APP_API_ENDPOINT } = process.env;
   const auth = useSelector((state) => state.userSlice.user);
   const navigate = useNavigate();
@@ -33,6 +38,7 @@ const ShowNews = () => {
 
   const id = useParams()["id"];
   useEffect(() => {
+    setValue(true);
     if (auth == null) {
       console.log(auth);
       navigate("/login");
@@ -43,8 +49,16 @@ const ShowNews = () => {
         headers: { Authorization: "Bearer " + auth.token },
       })
       .then((data) => setNews(data.data))
-      .catch((err) => console.log(err));
-  }, [REACT_APP_API_ENDPOINT, auth, id, navigate]);
+      .catch((err) => {
+        if (err.response.status === 401) {
+          dispatch(logout());
+          navigate("/login");
+        }
+      })
+      .finally(() => {
+        setValue(false);
+      });
+  }, [REACT_APP_API_ENDPOINT, auth, id, navigate, dispatch, setValue]);
   console.log(news);
   return (
     <>
@@ -77,7 +91,11 @@ const ShowNews = () => {
             >
               {news.country.map((data, index) => (
                 <SwiperSlide key={index}>
-                  <img style={{width: '50px', height: '50px'}} src={data.flagUrl} alt="" />
+                  <img
+                    style={{ width: "50px", height: "50px" }}
+                    src={data.flagUrl}
+                    alt=""
+                  />
                   {data.name}
                 </SwiperSlide>
               ))}

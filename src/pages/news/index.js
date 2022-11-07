@@ -1,6 +1,6 @@
 import { Box, Button, Paper, TextField, Typography } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import Page from "../../components/Pagination";
@@ -16,7 +16,7 @@ import "./styles.css";
 
 // import required modules
 import { FreeMode, Pagination } from "swiper";
-import { setLoading } from "../../reducers/loadingSlice";
+import { UserContext } from "../../context/UserContext";
 
 const ListNews = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -29,8 +29,10 @@ const ListNews = () => {
   const [newsList, setNewsList] = useState([]);
   const [pageOrdering, setPageOrdering] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const { setValue } = useContext(UserContext);
 
   const deleteHandler = (id) => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/news/` + id, {
         headers: {
@@ -49,6 +51,9 @@ const ListNews = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   };
 
@@ -64,7 +69,7 @@ const ListNews = () => {
       behavior: "smooth",
     });
     if (searchTerm === "") {
-      dispatch(setLoading(true));
+      setValue(true);
       axios
         .get(
           `${REACT_APP_API_ENDPOINT}/api/news?page=${currentPage}&itemsPerPage=${PageSize}&order%5BpublishedAt%5D=desc`,
@@ -86,12 +91,12 @@ const ListNews = () => {
           }
         })
         .finally(() => {
-          dispatch(setLoading(false));
+          setValue(false);
         });
     } else {
       const delayDebounceFn = setTimeout(() => {
-        dispatch(setLoading(true));
         setCurrentPage(1);
+        setValue(true);
         axios
           .get(
             `${REACT_APP_API_ENDPOINT}/api/news?page=${currentPage}&itemsPerPage=${PageSize}&order%5BpublishedAt%5D=desc&country.name=` +
@@ -114,7 +119,7 @@ const ListNews = () => {
             }
           })
           .finally(() => {
-            dispatch(setLoading(false));
+            setValue(false);
           });
       }, 1000);
       return () => clearTimeout(delayDebounceFn);
@@ -127,7 +132,9 @@ const ListNews = () => {
     searchTerm,
     user,
     pageOrdering,
+    setValue,
   ]);
+
   return (
     <>
       <Button

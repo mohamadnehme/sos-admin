@@ -11,6 +11,8 @@ import { logout } from "../../reducers/userSlice.js";
 import Tab from "react-bootstrap/Tab";
 import Tabs from "react-bootstrap/Tabs";
 import UserContacts from "./contacts";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const ShowUser = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -25,6 +27,7 @@ const ShowUser = () => {
   const [frequency, setFrequency] = useState("");
   const [offline_buffering, setOffline_buffering] = useState(false);
   const [contacts, setContacts] = useState([]);
+  const { setValue } = useContext(UserContext);
 
   const [user, setUser] = useState({
     id: "",
@@ -39,6 +42,7 @@ const ShowUser = () => {
 
   const id = useParams()["id"];
   useEffect(() => {
+    setValue(true);
     axios
       .get(`${REACT_APP_API_ENDPOINT}/api/users/` + id, {
         headers: { Authorization: "Bearer " + auth.token },
@@ -60,10 +64,10 @@ const ShowUser = () => {
         setFrequency(f);
         setOffline_buffering(off);
         setUser(users);
-        console.log(data);
       })
       .catch((err) => {
         console.log(err);
+        setValue(false);
         if (err.response.status === 401) {
           dispatch(logout());
           navigate("/login");
@@ -83,8 +87,11 @@ const ShowUser = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
-  }, [REACT_APP_API_ENDPOINT, auth, dispatch, id, navigate]);
+  }, [REACT_APP_API_ENDPOINT, auth.token, dispatch, id, navigate, setValue]);
 
   return (
     <>

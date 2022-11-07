@@ -14,6 +14,8 @@ import {
   TableHead,
   TableRow,
 } from "@mui/material";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const ShowAlert = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -21,6 +23,7 @@ const ShowAlert = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [alert, setAlert] = useState(null);
+  const { value, setValue } = useContext(UserContext);
 
   const id = useParams()["id"];
 
@@ -53,6 +56,7 @@ const ShowAlert = () => {
   };
 
   useEffect(() => {
+    setValue(true);
     axios
       .get(`${REACT_APP_API_ENDPOINT}/api/locations/${id}`, {
         headers: {
@@ -69,8 +73,12 @@ const ShowAlert = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
-  }, [REACT_APP_API_ENDPOINT, dispatch, id, navigate, user]);
+
+  }, [REACT_APP_API_ENDPOINT, dispatch, id, navigate, user, setValue]);
 
   return (
     <>
@@ -142,7 +150,7 @@ const ShowAlert = () => {
                     hover
                     sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
                   >
-                    <TableCell align="center">Logintude</TableCell>
+                    <TableCell align="center">Longitude</TableCell>
                     <TableCell align="center">{alert.longitude}</TableCell>
                   </TableRow>
 
@@ -173,7 +181,7 @@ const ShowAlert = () => {
           </div>
         </>
       )}
-      {!alert && (
+      {!alert && value === false && (
         <div style={{ width: "100%", textAlign: "center" }}>
           <h1>No location to show</h1>
         </div>

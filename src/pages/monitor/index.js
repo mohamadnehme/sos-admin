@@ -31,38 +31,38 @@ export default function Monitor() {
       return;
     }
     axios
-      .get(
-        `${REACT_APP_API_ENDPOINT}/api/devices?status=${1}&page=1&itemsPerPage=100`,
-        {
-          headers: {
-            Authorization: "Bearer " + auth.token,
-          },
-        }
-      )
+      .get(`${REACT_APP_API_ENDPOINT}/api/getAllDevices`, {
+        headers: {
+          Authorization: "Bearer " + auth.token,
+        },
+      })
       .then((data) => {
         const d = data.data["hydra:member"];
         if (d.length !== 0) {
           setPoints(
-            d.map((crime) => ({
-              type: "Feature",
-              properties: {
-                cluster: false,
-                crimeId: crime.id,
-                category: crime.type,
-                detail: crime,
-              },
-              geometry: {
-                type: "Point",
-                coordinates: [
-                  parseFloat(
-                    crime.trackers[crime.trackers.length - 1].longitude
-                  ),
-                  parseFloat(
-                    crime.trackers[crime.trackers.length - 1].latitude
-                  ),
-                ],
-              },
-            }))
+            d.map(
+              (crime) =>
+                crime.trackers.length > 0 && {
+                  type: "Feature",
+                  properties: {
+                    cluster: false,
+                    crimeId: crime.id,
+                    category: crime.type,
+                    detail: crime,
+                  },
+                  geometry: {
+                    type: "Point",
+                    coordinates: [
+                      parseFloat(
+                        crime.trackers[crime.trackers.length - 1].longitude
+                      ),
+                      parseFloat(
+                        crime.trackers[crime.trackers.length - 1].latitude
+                      ),
+                    ],
+                  },
+                }
+            )
           );
         }
       })
@@ -75,39 +75,39 @@ export default function Monitor() {
       });
     changeIntervalRef.current = setInterval(() => {
       axios
-        .get(
-          `${REACT_APP_API_ENDPOINT}/api/getAllDevices`,
-          {
-            headers: {
-              Authorization: "Bearer " + auth.token,
-            },
-          }
-        )
+        .get(`${REACT_APP_API_ENDPOINT}/api/getAllDevices`, {
+          headers: {
+            Authorization: "Bearer " + auth.token,
+          },
+        })
         .then((data) => {
           const d = data.data["hydra:member"];
           console.log(d);
           if (d.length !== 0) {
             setPoints(
-              d.map((crime) => ({
-                type: "Feature",
-                properties: {
-                  cluster: false,
-                  crimeId: crime.id,
-                  category: crime.type,
-                  detail: crime,
-                },
-                geometry: {
-                  type: "Point",
-                  coordinates: [
-                    parseFloat(
-                      crime.trackers[crime.trackers.length - 1].longitude
-                    ),
-                    parseFloat(
-                      crime.trackers[crime.trackers.length - 1].latitude
-                    ),
-                  ],
-                },
-              }))
+              d.map(
+                (crime) =>
+                  crime.trackers.length > 0 && {
+                    type: "Feature",
+                    properties: {
+                      cluster: false,
+                      crimeId: crime.id,
+                      category: crime.type,
+                      detail: crime,
+                    },
+                    geometry: {
+                      type: "Point",
+                      coordinates: [
+                        parseFloat(
+                          crime.trackers[crime.trackers.length - 1].longitude
+                        ),
+                        parseFloat(
+                          crime.trackers[crime.trackers.length - 1].latitude
+                        ),
+                      ],
+                    },
+                  }
+              )
             );
           }
         })
