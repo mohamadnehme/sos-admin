@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { logout } from "../../reducers/userSlice.js";
@@ -24,6 +24,8 @@ import {
   OutlinedInput,
   Select,
 } from "@mui/material";
+import { UserContext } from "../../context/UserContext.js";
+// import { setLoading } from "../../reducers/loadingSlice.js";
 
 const MenuProps = {
   PaperProps: {
@@ -44,6 +46,7 @@ const ListDevice = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [pageOrdering, setPageOrdering] = useState(0);
   const [status, setStatus] = useState("all");
+  const { setValue } = useContext(UserContext);
 
   const PageSize = 5;
 
@@ -52,6 +55,7 @@ const ListDevice = () => {
     setStatus(value);
   };
   const deleteHandler = (id) => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/devices/` + id, {
         headers: {
@@ -70,10 +74,14 @@ const ListDevice = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   };
 
   useEffect(() => {
+    setValue(true);
     if (user == null) {
       navigate("/login");
       return;
@@ -96,7 +104,6 @@ const ListDevice = () => {
         }
       )
       .then((data) => {
-        console.log(data.data["hydra:member"], data.data["hydra:totalItems"]);
         setDeviceList(data.data["hydra:member"]);
         setTotalCount(data.data["hydra:totalItems"]);
       })
@@ -106,6 +113,9 @@ const ListDevice = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   }, [
     REACT_APP_API_ENDPOINT,
@@ -115,6 +125,7 @@ const ListDevice = () => {
     user,
     pageOrdering,
     status,
+    setValue,
   ]);
 
   return (
@@ -140,7 +151,7 @@ const ListDevice = () => {
         <div>
           <InputLabel id="demo-multiple-checkbox-label">Status</InputLabel>
           <Select
-            style={{ width: "100px", height: '40px' }}
+            style={{ width: "100px", height: "40px" }}
             labelId="demo-multiple-checkbox-label"
             id="demo-multiple-checkbox"
             value={status}
@@ -248,11 +259,11 @@ const ListDevice = () => {
                 <TableCell align="center">
                   <button
                     onClick={() => {
-                      navigate("/history/" + row.id);
+                      navigate("/trace/" + row.id);
                     }}
                     className="btn btn-light"
                   >
-                    history
+                    Trace
                   </button>
                 </TableCell>
                 <TableCell align="center">

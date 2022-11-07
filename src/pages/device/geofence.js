@@ -5,7 +5,7 @@ import Map from "./Map";
 import "./geo.css";
 import axios from "axios";
 import { useParams } from "react-router-dom";
-// import { logout } from "../../reducers/userSlice";
+import { logout } from "../../reducers/userSlice";
 
 function withParams(Component) {
   return (props) => <Component {...props} params={useParams()} />;
@@ -58,8 +58,8 @@ class GeofenceDevice extends Component {
       .catch((err) => {
         console.log(err);
         if (err.response && err.response.status === 401) {
-          // logout();
-          // this.props.navigation.navigate("/login");
+          logout();
+          this.props.navigation.navigate("/login");
         }
       });
   }

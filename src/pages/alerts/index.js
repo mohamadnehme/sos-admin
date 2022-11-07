@@ -22,6 +22,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext.js";
 
 const ListAlerts = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -33,6 +35,7 @@ const ListAlerts = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [pageOrdering, setPageOrdering] = useState(0);
   const PageSize = 5;
+  const { setValue } = useContext(UserContext);
 
   const [open, setOpen] = useState(false);
 
@@ -45,6 +48,7 @@ const ListAlerts = () => {
   };
 
   const deleteAllHandler = () => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/locations/deleteAll`, {
         headers: {
@@ -65,10 +69,12 @@ const ListAlerts = () => {
       })
       .finally(() => {
         setOpen(false);
+        setValue(false);
       });
   };
 
   const deleteHandler = (id) => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/locations/` + id, {
         headers: {
@@ -87,6 +93,9 @@ const ListAlerts = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   };
 
@@ -95,6 +104,7 @@ const ListAlerts = () => {
       navigate("/login");
       return;
     }
+    setValue(true);
     axios
       .get(
         `${REACT_APP_API_ENDPOINT}/api/locations?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc`,
@@ -114,6 +124,9 @@ const ListAlerts = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   }, [
     REACT_APP_API_ENDPOINT,
@@ -122,6 +135,7 @@ const ListAlerts = () => {
     navigate,
     user,
     pageOrdering,
+    setValue
   ]);
   return (
     <>

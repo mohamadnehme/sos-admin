@@ -14,7 +14,7 @@ function App() {
   useEffect(() => {
     if (user == null) {
       console.log(user);
-      navigate('/login');
+      navigate("/login");
       return;
     }
     // axios
@@ -32,20 +32,13 @@ function App() {
     //   });
   }, [REACT_APP_API_ENDPOINT, navigate, user]);
 
+
   return (
     <>
       <ToastContainer hideProgressBar />
-
       <Routes>
         <Route exact path="/*" element={<Home />} />
-        {/* accountExist should be true or false */}
         <Route exact path="/login" element={<Account />} />
-        {/*<Route exact path="/applyartist" element={<ApplyArtist />} />
-        <Route exact path="/profile/:artistId" element={<Profile />} />
-        <Route exact path="/userProfile" element={<UserProfile />} />
-        <Route exact path="/allsong" element={<AllSong />} />
-        <Route exact path="/dashboard/*" element={<Dashboard />} /> */}
-        {/* <Route path="/404" element={<div>page not found</div>}/> */}
       </Routes>
     </>
   );

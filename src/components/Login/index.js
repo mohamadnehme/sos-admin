@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { login } from "../../reducers/userSlice.js";
 import { AiFillEyeInvisible, AiFillEye } from "react-icons/ai";
+import jwt_decode from "jwt-decode";
 import {
   LoginTitle,
   LoginLabel,
@@ -53,10 +54,15 @@ const Login = () => {
           }
         )
         .then((data) => {
+          const roles = jwt_decode(data.data.token).roles;
+          if (!roles.includes("ROLE_ADMIN")) {
+            toast.error("you are not the admin");
+            return
+          }
           dispatch(
             login({
               loggedIn: true,
-              token: data.data.token
+              token: data.data.token,
             })
           );
           navigate("/");

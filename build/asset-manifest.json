@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/static/css/main.27ba46ea.css",
-    "main.js": "/static/js/main.8af78c27.js",
+    "main.js": "/static/js/main.5eef15df.js",
     "static/media/aghaniIo.png": "/static/media/aghaniIo.caf9b9d95afe71bbd29a.png",
     "static/media/map-marker_hfipes.png": "/static/media/map-marker_hfipes.60be1644ea74709b0558.png",
     "index.html": "/index.html",
     "main.27ba46ea.css.map": "/static/css/main.27ba46ea.css.map",
-    "main.8af78c27.js.map": "/static/js/main.8af78c27.js.map"
+    "main.5eef15df.js.map": "/static/js/main.5eef15df.js.map"
   },
   "entrypoints": [
     "static/css/main.27ba46ea.css",
-    "static/js/main.8af78c27.js"
+    "static/js/main.5eef15df.js"
   ]
 }

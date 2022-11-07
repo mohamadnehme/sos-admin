@@ -12,6 +12,8 @@ import { useDispatch, useSelector } from "react-redux";
 import jwt_decode from "jwt-decode";
 import { logout } from "../../reducers/userSlice";
 import { useNavigate } from "react-router-dom";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext";
 
 const { REACT_APP_API_ENDPOINT } = process.env;
 
@@ -23,6 +25,7 @@ export const Settings = () => {
   const [frequency, setFrequency] = useState("");
   const [offline_buffering, setOffline_buffering] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { setValue } = useContext(UserContext);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -40,6 +43,7 @@ export const Settings = () => {
     frequency !== "";
 
   useEffect(() => {
+    setValue(true);
     axios
       .get(`${REACT_APP_API_ENDPOINT}/api/getSettings`)
       .then((data) => {
@@ -51,13 +55,16 @@ export const Settings = () => {
         setOffline_buffering(data.data.offline_buffering);
       })
       .catch((err) => {
-          console.log(err);
+        console.log(err);
         if (err.response.status === 401) {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
-  }, [dispatch, navigate]);
+  }, [dispatch, navigate, setValue]);
 
   const handleDomain = (event) => {
     setDomain(event.target.value);

@@ -1,12 +1,18 @@
 import { FormGroup, TextField } from "@mui/material";
 import axios from "axios";
+import { useContext } from "react";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useParams } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
+import { logout } from "../../reducers/userSlice";
 
 const ShowDevice = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
   const auth = useSelector((state) => state.userSlice.user);
+  const { setValue } = useContext(UserContext);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
   const [device, setDevice] = useState({
     name: "",
@@ -18,14 +24,23 @@ const ShowDevice = () => {
 
   const id = useParams()["id"];
   useEffect(() => {
+    setValue(true);
     axios
       .get(`${REACT_APP_API_ENDPOINT}/api/devices/` + id, {
         headers: { Authorization: "Bearer " + auth.token },
       })
       .then((data) => setDevice(data.data))
-      .catch((err) => console.log(err));
-  }, [REACT_APP_API_ENDPOINT, auth.token, id]);
-  console.log(device);
+      .catch((err) => {
+        if (err.response.status === 401) {
+          dispatch(logout());
+          navigate("/login");
+        }
+      })
+      .finally(() => {
+        setValue(false);
+      });
+  }, [REACT_APP_API_ENDPOINT, auth.token, id, dispatch, navigate, setValue]);
+
   return (
     <>
       <h2>Show Device</h2>

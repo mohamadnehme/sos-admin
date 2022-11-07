@@ -17,6 +17,8 @@ import "../../index.css";
 import Button from "@mui/material/Button";
 
 import Moment from "moment";
+import { useContext } from "react";
+import { UserContext } from "../../context/UserContext.js";
 
 const ListUsers = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -27,10 +29,12 @@ const ListUsers = () => {
   const dispatch = useDispatch();
   const [totalCount, setTotalCount] = useState(0);
   const [pageOrdering, setPageOrdering] = useState(0);
+  const { setValue } = useContext(UserContext);
 
   const PageSize = 5;
 
   const deleteHandler = (id) => {
+    setValue(true);
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/users/` + id, {
         headers: {
@@ -49,6 +53,9 @@ const ListUsers = () => {
           dispatch(logout());
           navigate("/login");
         }
+      })
+      .finally(() => {
+        setValue(false);
       });
   };
 
@@ -57,6 +64,7 @@ const ListUsers = () => {
       navigate("/login");
       return;
     }
+    setValue(true);
     axios
       .get(
         `${REACT_APP_API_ENDPOINT}/api/users?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc`,
@@ -76,6 +84,8 @@ const ListUsers = () => {
           dispatch(logout());
           navigate("/login");
         }
+      }).finally(() => {
+        setValue(false);
       });
   }, [
     REACT_APP_API_ENDPOINT,
@@ -84,6 +94,7 @@ const ListUsers = () => {
     navigate,
     user,
     pageOrdering,
+    setValue
   ]);
 
   return (

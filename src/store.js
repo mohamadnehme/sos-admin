@@ -17,10 +17,14 @@ const persistConfig = {
   version: 1,
   storage,
 };
-const persistedReducer = persistReducer(persistConfig, userReducer);
+const userPersistedReducer = persistReducer(persistConfig, userReducer);
+// const loadingPersistedReducer = persistReducer(persistConfig, loadingReducer);
 
 export const store = configureStore({
-  reducer: { userSlice: persistedReducer},
+  reducer: {
+    userSlice: userPersistedReducer,
+    // loadingSlice: loadingPersistedReducer,
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

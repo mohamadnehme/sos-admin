@@ -1,0 +1,11 @@
+.crime-marker {
+    background: none;
+    border: none;
+    position: absolute;
+}
+
+.crime-marker img{
+    width: 25px;
+}
+
+.map-marker-icon { display: block !important; margin-top: 10px !important; }
