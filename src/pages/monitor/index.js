@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import GoogleMapReact from "google-map-react";
+// import { Map, InfoWindow, GoogleApiWrapper } from "google-maps-react";
 import useSupercluster from "use-supercluster";
 import "./style.css";
 import axios from "axios";
@@ -7,6 +8,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router";
 import { logout } from "../../reducers/userSlice";
 import image from "../../assets/logo/map-marker_hfipes.png";
+import Popup from "../../components/Popup";
 
 const Marker = ({ children }) => children;
 
@@ -19,8 +21,9 @@ export default function Monitor() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { REACT_APP_API_ENDPOINT } = process.env;
-
+  const [modalShow, setModalShow] = useState(false);
   const changeIntervalRef = useRef(null);
+  const [info, setInfo] = useState(null);
 
   useEffect(() => {
     if (!auth) {
@@ -28,13 +31,15 @@ export default function Monitor() {
       return;
     }
     axios
-      .get(`${REACT_APP_API_ENDPOINT}/api/devices?status=${1}`, {
-        headers: {
-          Authorization: "Bearer " + auth.token,
-        },
-      })
+      .get(
+        `${REACT_APP_API_ENDPOINT}/api/devices?status=${1}&page=1&itemsPerPage=100`,
+        {
+          headers: {
+            Authorization: "Bearer " + auth.token,
+          },
+        }
+      )
       .then((data) => {
-        
         const d = data.data["hydra:member"];
         if (d.length !== 0) {
           setPoints(
@@ -44,6 +49,7 @@ export default function Monitor() {
                 cluster: false,
                 crimeId: crime.id,
                 category: crime.type,
+                detail: crime,
               },
               geometry: {
                 type: "Point",
@@ -69,11 +75,14 @@ export default function Monitor() {
       });
     changeIntervalRef.current = setInterval(() => {
       axios
-        .get(`${REACT_APP_API_ENDPOINT}/api/devices?status=${1}`, {
-          headers: {
-            Authorization: "Bearer " + auth.token,
-          },
-        })
+        .get(
+          `${REACT_APP_API_ENDPOINT}/api/getAllDevices`,
+          {
+            headers: {
+              Authorization: "Bearer " + auth.token,
+            },
+          }
+        )
         .then((data) => {
           const d = data.data["hydra:member"];
           console.log(d);
@@ -85,6 +94,7 @@ export default function Monitor() {
                   cluster: false,
                   crimeId: crime.id,
                   category: crime.type,
+                  detail: crime,
                 },
                 geometry: {
                   type: "Point",
@@ -156,8 +166,8 @@ export default function Monitor() {
                 <div
                   className="cluster-marker"
                   style={{
-                    width: `${10 + (pointCount / points.length) * 20}px`,
-                    height: `${10 + (pointCount / points.length) * 20}px`,
+                    width: `${20 + (pointCount / points.length) * 20}px`,
+                    height: `${20 + (pointCount / points.length) * 20}px`,
                   }}
                   onClick={() => {
                     const expansionZoom = Math.min(
@@ -180,13 +190,24 @@ export default function Monitor() {
               lat={latitude}
               lng={longitude}
             >
-              <button className="crime-marker">
+              <button
+                className="crime-marker"
+                onClick={() => {
+                  setInfo(cluster.properties.detail);
+                  setModalShow(true);
+                }}
+              >
                 <img src={image} alt="device" />
               </button>
             </Marker>
           );
         })}
       </GoogleMapReact>
+      <Popup
+        detail={info}
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+      />
     </div>
   );
 }

@@ -17,6 +17,8 @@ const { REACT_APP_API_ENDPOINT } = process.env;
 
 export const Settings = () => {
   const [domain, setDomain] = useState("");
+  // const [ip, setIp] = useState("");
+  const [port, setPort] = useState("");
   const [angle, setAngle] = useState("");
   const [accuracy, setAccuracy] = useState("");
   const [distance, setDistance] = useState("");
@@ -37,7 +39,9 @@ export const Settings = () => {
     distance >= 0 &&
     angle >= 0 &&
     frequency >= 0 &&
-    frequency !== "";
+    frequency !== "" &&
+    // ip !== "" &&
+    port !== "";
 
   useEffect(() => {
     axios
@@ -49,9 +53,11 @@ export const Settings = () => {
         setDistance(data.data.distance);
         setFrequency(data.data.frequency);
         setOffline_buffering(data.data.offline_buffering);
+        // setIp(data.data.ip);
+        setPort(data.data.port);
       })
       .catch((err) => {
-          console.log(err);
+        console.log(err);
         if (err.response.status === 401) {
           dispatch(logout());
           navigate("/login");
@@ -61,6 +67,12 @@ export const Settings = () => {
 
   const handleDomain = (event) => {
     setDomain(event.target.value);
+  };
+  // const handleIp = (event) => {
+  //   setIp(event.target.value);
+  // };
+  const handlePort = (event) => {
+    setPort(event.target.value);
   };
   const handleAngle = (event) => {
     setAngle(event.target.value);
@@ -93,6 +105,8 @@ export const Settings = () => {
               distance: distance,
               frequency: frequency,
               offline_buffering: offline_buffering,
+              // ip: ip,
+              port: port,
             },
           },
           {
@@ -132,10 +146,24 @@ export const Settings = () => {
         <div>
           <TextField
             id="outlined-select-currency"
-            label="Domain"
+            label="Domain or Ip"
             value={domain}
             onChange={handleDomain}
-            helperText="Please select a domain"
+            helperText="Please select a domain or ip"
+          ></TextField>
+          {/* <TextField
+            id="outlined-select-currency"
+            label="Ip"
+            value={ip}
+            onChange={setIp}
+            helperText="Please select an ip"
+          ></TextField> */}
+          <TextField
+            id="outlined-select-currency"
+            label="Port"
+            value={port}
+            onChange={handlePort}
+            helperText="Please select a port"
           ></TextField>
           <TextField
             id="outlined-select-currency"

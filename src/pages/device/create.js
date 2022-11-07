@@ -45,7 +45,7 @@ const CreateDevice = () => {
 
       axios
         .post(
-          `${REACT_APP_API_ENDPOINT}}/api/devices`,
+          `${REACT_APP_API_ENDPOINT}/api/devices`,
           {
             name: name,
             type: type,

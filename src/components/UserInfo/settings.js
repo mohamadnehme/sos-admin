@@ -17,8 +17,15 @@ export const Settings = (props) => {
         <div>
           <TextField
             id="outlined-select-currency"
-            label="Domain"
+            label="Domain or Ip"
             value={props.domain}
+            helperText="Please select a domain"
+            disabled={true}
+          ></TextField>
+          <TextField
+            id="outlined-select-currency"
+            label="Port"
+            value={props.port}
             helperText="Please select a domain"
             disabled={true}
           ></TextField>

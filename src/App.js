@@ -35,7 +35,6 @@ function App() {
   return (
     <>
       <ToastContainer hideProgressBar />
-
       <Routes>
         <Route exact path="/*" element={<Home />} />
         {/* accountExist should be true or false */}

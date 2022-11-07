@@ -16,6 +16,7 @@ import "./styles.css";
 
 // import required modules
 import { FreeMode, Pagination } from "swiper";
+import { setLoading } from "../../reducers/loadingSlice";
 
 const ListNews = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
@@ -52,12 +53,18 @@ const ListNews = () => {
   };
 
   useEffect(() => {
+    if (!user) {
+      dispatch(logout());
+      navigate("/login");
+      return;
+    }
     window.scroll({
       top: 0,
       left: 0,
       behavior: "smooth",
     });
     if (searchTerm === "") {
+      dispatch(setLoading(true));
       axios
         .get(
           `${REACT_APP_API_ENDPOINT}/api/news?page=${currentPage}&itemsPerPage=${PageSize}&order%5BpublishedAt%5D=desc`,
@@ -77,9 +84,13 @@ const ListNews = () => {
             dispatch(logout());
             navigate("/login");
           }
+        })
+        .finally(() => {
+          dispatch(setLoading(false));
         });
     } else {
       const delayDebounceFn = setTimeout(() => {
+        dispatch(setLoading(true));
         setCurrentPage(1);
         axios
           .get(
@@ -95,6 +106,15 @@ const ListNews = () => {
             console.log(res);
             setNewsList(res.data["hydra:member"]);
             setTotalCount(res.data["hydra:totalItems"]);
+          })
+          .catch((err) => {
+            if (err.response.status === 401) {
+              dispatch(logout());
+              navigate("/login");
+            }
+          })
+          .finally(() => {
+            dispatch(setLoading(false));
           });
       }, 1000);
       return () => clearTimeout(delayDebounceFn);
@@ -105,7 +125,7 @@ const ListNews = () => {
     dispatch,
     navigate,
     searchTerm,
-    user.token,
+    user,
     pageOrdering,
   ]);
   return (

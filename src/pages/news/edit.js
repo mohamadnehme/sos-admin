@@ -1,7 +1,18 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Box, Button, FormGroup, TextField } from "@mui/material";
+import {
+  Box,
+  Button,
+  Checkbox,
+  FormGroup,
+  InputLabel,
+  ListItemText,
+  MenuItem,
+  OutlinedInput,
+  Select,
+  TextField,
+} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../reducers/userSlice";
 
@@ -22,6 +33,8 @@ const EditNews = () => {
   const [fileUrl, setFileUrl] = useState("");
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [isoCountry, setIsoCountry] = useState([]);
 
   const user = useSelector((state) => state.userSlice.user);
 
@@ -29,6 +42,12 @@ const EditNews = () => {
   const onChange = (e) => {
     setFile(e.target.files[0]);
   };
+
+  useEffect(() => {
+    axios.get(`${REACT_APP_API_ENDPOINT}/api/countries?page=1`).then((res) => {
+      setCountries(res.data["hydra:member"]);
+    });
+  }, []);
 
   useEffect(() => {
     axios
@@ -44,7 +63,6 @@ const EditNews = () => {
         setContent(data.data.content);
         setUrl(data.data.url);
         setFileUrl(data.data.fileUrl);
-        console.log(data);
       })
       .catch((err) => {
         if (err.response.status === 401) {
@@ -52,7 +70,7 @@ const EditNews = () => {
           navigate("/login");
         }
       });
-  }, [dispatch, id, navigate, user.token]);
+  }, [dispatch, id, navigate, user]);
 
   let valid =
     author !== "" &&
@@ -60,6 +78,26 @@ const EditNews = () => {
     description !== "" &&
     content !== "" &&
     url !== "";
+
+  const handleChange = (event) => {
+    const {
+      target: { value },
+    } = event;
+    setIsoCountry(typeof value === "string" ? value.split(",") : value);
+  };
+
+  const ITEM_HEIGHT = 48;
+
+  const ITEM_PADDING_TOP = 8;
+
+  const MenuProps = {
+    PaperProps: {
+      style: {
+        maxHeight: ITEM_HEIGHT * 4.5 + ITEM_PADDING_TOP,
+        width: 250,
+      },
+    },
+  };
 
   const onSubmit = () => {
     if (
@@ -81,6 +119,10 @@ const EditNews = () => {
       formData.append("content", content);
 
       formData.append("url", url);
+
+      isoCountry.forEach((element) => {
+        formData.append("isoCountry[]", element);
+      });
 
       if (file) formData.append("file", file);
 
@@ -183,6 +225,29 @@ const EditNews = () => {
               variant="outlined"
             />
             <br />
+            <InputLabel id="demo-multiple-checkbox-label">Country</InputLabel>
+            {countries.length > 0 && (
+              <Select
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
+                multiple
+                value={isoCountry}
+                onChange={handleChange}
+                input={<OutlinedInput label="Tag" />}
+                renderValue={(selected) => selected.join(", ")}
+                MenuProps={MenuProps}
+              >
+                {countries.map((data) => (
+                  <MenuItem key={data.id} value={data.iso_code_2}>
+                    <Checkbox
+                      checked={isoCountry.indexOf(data.iso_code_2) > -1}
+                    />
+                    <img src={data.flagUrl} alt="" /> &nbsp; &nbsp;
+                    <ListItemText primary={data.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
             <br />
             <input type="file" onChange={onChange} />
             <br />

@@ -8,8 +8,10 @@ import Paper from "@mui/material/Paper";
 
 import "../../index.css";
 import Moment from "moment";
+import { useNavigate } from "react-router";
 
 const UserContacts = (props) => {
+  const navigate = useNavigate();
   return (
     <>
       <h2>User Contacts</h2>
@@ -25,6 +27,8 @@ const UserContacts = (props) => {
               <TableCell align="center">lastname</TableCell>
               <TableCell align="center">created at</TableCell>
               <TableCell align="center">user</TableCell>
+              <TableCell align="center">mobile number</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -41,9 +45,20 @@ const UserContacts = (props) => {
                 <TableCell align="center">{row.firstname}</TableCell>
                 <TableCell align="center">{row.lastname}</TableCell>
                 <TableCell align="center">
-                  {Moment(row.createdAt).format("dd/mm/yyyy")}
+                {Moment(row.createdAt).format("MMMM Do YYYY")}
                 </TableCell>
                 <TableCell align="center">{row.email}</TableCell>
+                <TableCell align="center">{row.phone}</TableCell>
+                <TableCell align="center">
+                  <button
+                    onClick={() => {
+                      navigate("/editContact/" + row.id);
+                    }}
+                    className="btn btn-warning"
+                  >
+                    Edit
+                  </button>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

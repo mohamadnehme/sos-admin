@@ -18,6 +18,7 @@ const ShowUser = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [domain, setDomain] = useState("");
+  const [port, setPort] = useState("");
   const [angle, setAngle] = useState("");
   const [accuracy, setAccuracy] = useState("");
   const [distance, setDistance] = useState("");
@@ -44,6 +45,7 @@ const ShowUser = () => {
       })
       .then((data) => {
         const dom = data.data.settings.domain;
+        const port = data.data.settings.port;
         const ac = data.data.settings.accuracy;
         const an = data.data.settings.angle;
         const di = data.data.settings.distance;
@@ -51,6 +53,7 @@ const ShowUser = () => {
         const off = data.data.settings.offline_buffering;
         const users = data.data;
         setDomain(dom);
+        setPort(port);
         setAccuracy(ac);
         setAngle(an);
         setDistance(di);
@@ -81,7 +84,7 @@ const ShowUser = () => {
           navigate("/login");
         }
       });
-  }, [REACT_APP_API_ENDPOINT, auth.token, dispatch, id, navigate]);
+  }, [REACT_APP_API_ENDPOINT, auth, dispatch, id, navigate]);
 
   return (
     <>
@@ -106,6 +109,7 @@ const ShowUser = () => {
             <Tab eventKey="contact" title="Settings">
               <Settings
                 domain={domain}
+                port={port}
                 angle={angle}
                 accuracy={accuracy}
                 distance={distance}

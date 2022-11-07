@@ -14,31 +14,33 @@ import { useNavigate, useParams } from "react-router-dom";
 import { logout } from "../../reducers/userSlice";
 import Pagination from "../../components/Pagination";
 import Moment from "moment";
+import MyVerticallyCenteredModal from "../../components/Modal/index";
 
 const History = () => {
   const { REACT_APP_API_ENDPOINT } = process.env;
   const auth = useSelector((state) => state.userSlice.user);
 
-  const [trackers, setTrackers] = useState([]);
+  const [sos, setSos] = useState([]);
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const dispatch = useDispatch();
   const [totalCount, setTotalCount] = useState(0);
   //   const [pageOrdering, setPageOrdering] = useState(0);
   const PageSize = 10;
+  const [modalShow, setModalShow] = useState(false);
 
   const id = useParams()["id"];
   useEffect(() => {
     axios
       .get(
-        `${REACT_APP_API_ENDPOINT}/api/trackers?page=${currentPage}&itemsPerPage=${PageSize}&id=${id}`,
+        `${REACT_APP_API_ENDPOINT}/api/locations?page=${currentPage}&itemsPerPage=${PageSize}&device.id=${id}`,
         {
           headers: { Authorization: "Bearer " + auth.token },
         }
       )
       .then((data) => {
         // console.log(data);
-        setTrackers(data.data["hydra:member"]);
+        setSos(data.data["hydra:member"]);
         setTotalCount(data.data["hydra:totalItems"]);
       })
       .catch((err) => {
@@ -48,11 +50,11 @@ const History = () => {
           navigate("/login");
         }
       });
-  }, [REACT_APP_API_ENDPOINT, auth.token, currentPage, dispatch, id, navigate]);
-  console.log(trackers, totalCount);
+  }, [REACT_APP_API_ENDPOINT, auth, currentPage, dispatch, id, navigate]);
+  console.log(sos, totalCount);
   return (
     <>
-      <h2>Location History</h2>
+      <h2>Sos History</h2>
       <div style={{ width: "100%", marginBottom: "5%", marginTop: "5%" }}>
         <div style={{ width: "80%", margin: "auto" }}></div>
       </div>
@@ -60,35 +62,43 @@ const History = () => {
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
-              <TableCell align="center">id</TableCell>
-              <TableCell align="center">accuracy</TableCell>
-              <TableCell align="center">altitude</TableCell>
-              <TableCell align="center">created at</TableCell>
-              <TableCell align="center">bearing</TableCell>
+              <TableCell align="center">device Id</TableCell>
+              <TableCell align="center">device name</TableCell>
+              <TableCell align="center">Sos date</TableCell>
               <TableCell align="center">latitude</TableCell>
               <TableCell align="center">longitude</TableCell>
               <TableCell align="center">place</TableCell>
-              <TableCell align="center">velocity</TableCell>
+              <TableCell align="center"></TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {trackers.map((row, index) => (
+            {sos.map((row, index) => (
               <TableRow
                 hover
                 key={index}
                 sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
               >
-                <TableCell align="center">{row["@id"].split("/")[3]}</TableCell>
-                <TableCell align="center">{row.accuracy}</TableCell>
-                <TableCell align="center">{row.altitude}</TableCell>
+                <TableCell align="center">{row.device?.device_id}</TableCell>
+                <TableCell align="center">{row.device?.name}</TableCell>
                 <TableCell align="center">
-                  {Moment(row.createdAt).format("dd/mm/yyyy")}
+                {Moment(row.createdAt).format("MMMM Do YYYY")}
                 </TableCell>
-                <TableCell align="center">{row.bearing}</TableCell>
                 <TableCell align="center">{row.latitude}</TableCell>
-                <TableCell align="center">{row.bearing}</TableCell>
+                <TableCell align="center">{row.longitude}</TableCell>
                 <TableCell align="center">{row.place}</TableCell>
-                <TableCell align="center">{row.velocity}</TableCell>
+                <TableCell align="center">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => setModalShow(true)}
+                  >
+                    Recipients
+                  </button>
+                  <MyVerticallyCenteredModal
+                    show={modalShow}
+                    detail={row.device.user.userContacts}
+                    onHide={() => setModalShow(false)}
+                  />
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

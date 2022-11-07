@@ -5,12 +5,10 @@ import { useNavigate } from "react-router-dom";
 import {
   AccountBackground,
   LogoContainer,
-  LogoImage,
   LogoHeader,
   AccountContainer,
 } from "./AccountElements.js";
 import Login from "../../components/Login/index.js";
-import rightImage from "../../assets/logo/aghaniIo.png";
 
 const Account = () => {
   const navigate = useNavigate();
@@ -51,7 +49,6 @@ const Account = () => {
           toLanding();
         }}
       >
-        <LogoImage src={rightImage} />
         <LogoHeader>SOS BackOffice</LogoHeader>
       </LogoContainer>
 

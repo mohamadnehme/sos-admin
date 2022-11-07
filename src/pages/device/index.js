@@ -23,7 +23,9 @@ import {
   MenuItem,
   OutlinedInput,
   Select,
+  TextField,
 } from "@mui/material";
+// import { setLoading } from "../../reducers/loadingSlice.js";
 
 const MenuProps = {
   PaperProps: {
@@ -44,6 +46,7 @@ const ListDevice = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [pageOrdering, setPageOrdering] = useState(0);
   const [status, setStatus] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const PageSize = 5;
 
@@ -51,6 +54,17 @@ const ListDevice = () => {
     const value = event.target.value;
     setStatus(value);
   };
+
+  const StatusCircle = (props) => {
+    let color =
+      props.status === 1 ? "green" : props.status === 0 ? "red" : "yellow";
+    return (
+      <div
+        style={{ width: "25px", height: "25px", backgroundColor: color, margin: 'auto', borderRadius: '20px' }}
+      ></div>
+    );
+  };
+
   const deleteHandler = (id) => {
     axios
       .delete(`${REACT_APP_API_ENDPOINT}/api/devices/` + id, {
@@ -86,27 +100,62 @@ const ListDevice = () => {
         : status === "inactive"
         ? 0
         : -1;
-    axios
-      .get(
-        `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}`,
-        {
-          headers: {
-            Authorization: "Bearer " + user.token,
-          },
-        }
-      )
-      .then((data) => {
-        console.log(data.data["hydra:member"], data.data["hydra:totalItems"]);
-        setDeviceList(data.data["hydra:member"]);
-        setTotalCount(data.data["hydra:totalItems"]);
-      })
-      .catch((err) => {
-        console.log(err);
-        if (err.response.status === 401) {
-          dispatch(logout());
-          navigate("/login");
-        }
-      });
+    // dispatch(setLoading(true));
+    if (searchTerm === "") {
+      axios
+        .get(
+          `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}`,
+          {
+            headers: {
+              Authorization: "Bearer " + user.token,
+            },
+          }
+        )
+        .then((data) => {
+          console.log(data.data);
+          setDeviceList(data.data["hydra:member"]);
+          setTotalCount(data.data["hydra:totalItems"]);
+        })
+        .catch((err) => {
+          console.log(err);
+          if (err.response.status === 401) {
+            dispatch(logout());
+            navigate("/login");
+          }
+        })
+        .finally(() => {
+          // dispatch(setLoading(false));
+        });
+    } else {
+      const delayDebounceFn = setTimeout(() => {
+        setCurrentPage(1);
+        axios
+          .get(
+            `${REACT_APP_API_ENDPOINT}/api/devices?page=${currentPage}&itemsPerPage=${PageSize}&order%5BcreatedAt%5D=desc&status=${s}&user.email=` +
+              searchTerm,
+            {
+              headers: {
+                Authorization: "Bearer " + user.token,
+              },
+            }
+          )
+          .then((res) => {
+            console.log(res);
+            setDeviceList(res.data["hydra:member"]);
+            setTotalCount(res.data["hydra:totalItems"]);
+          })
+          .catch((err) => {
+            if (err.response.status === 401) {
+              dispatch(logout());
+              navigate("/login");
+            }
+          })
+          .finally(() => {
+            // dispatch(setLoading(false));
+          });
+      }, 1000);
+      return () => clearTimeout(delayDebounceFn);
+    }
   }, [
     REACT_APP_API_ENDPOINT,
     currentPage,
@@ -115,6 +164,7 @@ const ListDevice = () => {
     user,
     pageOrdering,
     status,
+    searchTerm,
   ]);
 
   return (
@@ -137,29 +187,44 @@ const ListDevice = () => {
             Create
           </Button>
         </div>
-        <div>
-          <InputLabel id="demo-multiple-checkbox-label">Status</InputLabel>
-          <Select
-            style={{ width: "100px", height: '40px' }}
-            labelId="demo-multiple-checkbox-label"
-            id="demo-multiple-checkbox"
-            value={status}
-            onChange={handleChange}
-            input={<OutlinedInput label="Status" />}
-            MenuProps={MenuProps}
-          >
-            <MenuItem key={1} value={"all"}>
-              <ListItemText primary={"all"} />
-            </MenuItem>
+        <div style={{ display: "flex", flexDirection: "row" }}>
+          <div>
+            <InputLabel id="demo-multiple-checkbox-label">User</InputLabel>
+            <TextField
+              size="small"
+              id="outlined-basic"
+              variant="outlined"
+              placeholder="Email"
+              onChange={(event) => {
+                setSearchTerm(event.target.value);
+              }}
+            ></TextField>
+          </div>
+          &nbsp; &nbsp;
+          <div>
+            <InputLabel id="demo-multiple-checkbox-label">Status</InputLabel>
+            <Select
+              style={{ width: "100px", height: "40px" }}
+              labelId="demo-multiple-checkbox-label"
+              id="demo-multiple-checkbox"
+              value={status}
+              onChange={handleChange}
+              input={<OutlinedInput label="Status" />}
+              MenuProps={MenuProps}
+            >
+              <MenuItem key={1} value={"all"}>
+                <ListItemText primary={"all"} />
+              </MenuItem>
 
-            <MenuItem key={2} value={"active"}>
-              <ListItemText primary={"active"} />
-            </MenuItem>
+              <MenuItem key={2} value={"active"}>
+                <ListItemText primary={"active"} />
+              </MenuItem>
 
-            <MenuItem key={3} value={"inactive"}>
-              <ListItemText primary={"inactive"} />
-            </MenuItem>
-          </Select>
+              <MenuItem key={3} value={"inactive"}>
+                <ListItemText primary={"inactive"} />
+              </MenuItem>
+            </Select>
+          </div>
         </div>
       </div>
       <br />
@@ -172,8 +237,9 @@ const ListDevice = () => {
               <TableCell align="center">name</TableCell>
               <TableCell align="center">type</TableCell>
               <TableCell align="center">created at</TableCell>
-              <TableCell align="center">user</TableCell>
-              <TableCell align="center">device status</TableCell>
+              <TableCell align="center">user name</TableCell>
+              <TableCell align="center">user email</TableCell>
+              <TableCell align="center">status</TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
@@ -193,15 +259,14 @@ const ListDevice = () => {
                 <TableCell align="center">{row.name}</TableCell>
                 <TableCell align="center">{row.type}</TableCell>
                 <TableCell align="center">
-                  {Moment(row.createdAt).format("dd/mm/yyyy")}
+                  {Moment(row.createdAt).format("MMMM Do YYYY")}
+                </TableCell>
+                <TableCell align="center">
+                  {row.user.firstname + " " + row.user.lastname}
                 </TableCell>
                 <TableCell align="center">{row.user.email}</TableCell>
                 <TableCell align="center">
-                  {row.status === 1
-                    ? "active"
-                    : row.status === 0
-                    ? "inactive"
-                    : "unavailable"}
+                  <StatusCircle status={row.status} />
                 </TableCell>
                 <TableCell align="center">
                   <button
@@ -252,7 +317,7 @@ const ListDevice = () => {
                     }}
                     className="btn btn-light"
                   >
-                    history
+                    Show history
                   </button>
                 </TableCell>
                 <TableCell align="center">

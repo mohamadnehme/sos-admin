@@ -33,8 +33,9 @@ const ListAlerts = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [pageOrdering, setPageOrdering] = useState(0);
   const PageSize = 5;
-
+  const [id, setId] = useState(null);
   const [open, setOpen] = useState(false);
+  const [openOne, setOpenOne] = useState(false);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -42,6 +43,10 @@ const ListAlerts = () => {
 
   const handleClose = () => {
     setOpen(false);
+  };
+
+  const handleCloseOne = () => {
+    setOpenOne(false);
   };
 
   const deleteAllHandler = () => {
@@ -87,6 +92,8 @@ const ListAlerts = () => {
           dispatch(logout());
           navigate("/login");
         }
+      }).finally(() => {
+        setOpenOne(false);
       });
   };
 
@@ -153,13 +160,38 @@ const ListAlerts = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog
+        open={openOne}
+        keepMounted
+        onClose={handleCloseOne}
+        aria-describedby="alert-dialog-slide-description"
+      >
+        <DialogTitle>{"Warning"}</DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-slide-description">
+            Are you sure you want to delete this logBook ?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseOne}>Disagree</Button>
+          <Button
+            onClick={() => {
+              deleteHandler(id);
+            }}
+          >
+            Agree
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <TableContainer component={Paper}>
         <Table stickyHeader aria-label="sticky table">
           <TableHead>
             <TableRow>
               <TableCell align="center">id</TableCell>
               <TableCell align="center">devices id</TableCell>
-              <TableCell align="center">created at</TableCell>
+              <TableCell align="center">sent on</TableCell>
               <TableCell align="center">user</TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
@@ -175,7 +207,7 @@ const ListAlerts = () => {
                 <TableCell align="center">{row.id}</TableCell>
                 <TableCell align="center">{row.device.device_id}</TableCell>
                 <TableCell align="center">
-                  {Moment(row.createdAt).format("dd/mm/yyyy")}
+                  {Moment(row.createdAt).format("MMMM Do YYYY")}
                 </TableCell>
                 <TableCell align="center">{row.device.user.email}</TableCell>
                 <TableCell align="center">
@@ -191,7 +223,8 @@ const ListAlerts = () => {
                 <TableCell align="center">
                   <button
                     onClick={() => {
-                      deleteHandler(row.id);
+                      setId(row.id);
+                      setOpenOne(true);
                     }}
                     className="btn btn-danger"
                   >

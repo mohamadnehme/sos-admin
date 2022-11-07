@@ -1,6 +1,5 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
-import enLocale from "i18n-iso-countries/langs/en.json";
 import { useNavigate } from "react-router";
 import {
   Checkbox,
@@ -15,8 +14,6 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../reducers/userSlice";
-
-var countries = require("i18n-iso-countries");
 
 const ITEM_HEIGHT = 48;
 
@@ -44,7 +41,7 @@ const CreateNews = () => {
   const [isoCountry, setIsoCountry] = useState([]);
   const [file, setFile] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [countryArr, setCountryArr] = useState([]);
+  const [countries, setCountries] = useState([]);
 
   const user = useSelector((state) => state.userSlice.user);
 
@@ -55,18 +52,11 @@ const CreateNews = () => {
   };
 
   useEffect(() => {
-    countries.registerLocale(enLocale);
-    const countryObj = countries.getNames("en", { select: "official" });
-    setCountryArr(
-      Object.entries(countryObj).map(([key, value]) => {
-        return {
-          label: value,
-          value: key,
-        };
-      })
-    );
+    axios.get(`${REACT_APP_API_ENDPOINT}/api/countries?page=1`).then((res) => {
+      setCountries(res.data["hydra:member"]);
+    });
   }, []);
-  
+
   const handleChange = (event) => {
     const {
       target: { value },
@@ -131,7 +121,6 @@ const CreateNews = () => {
         });
     }
   };
-
   return (
     <>
       <h2>Create News</h2>
@@ -193,23 +182,29 @@ const CreateNews = () => {
             />
             <br />
             <InputLabel id="demo-multiple-checkbox-label">Country</InputLabel>
-            <Select
-              labelId="demo-multiple-checkbox-label"
-              id="demo-multiple-checkbox"
-              multiple
-              value={isoCountry}
-              onChange={handleChange}
-              input={<OutlinedInput label="Tag" />}
-              renderValue={(selected) => selected.join(", ")}
-              MenuProps={MenuProps}
-            >
-              {countryArr.map(({ label, value }) => (
-                <MenuItem key={value} value={value}>
-                  <Checkbox checked={isoCountry.indexOf(value) > -1} />
-                  <ListItemText primary={label} />
-                </MenuItem>
-              ))}
-            </Select>
+            {countries.length > 0 && (
+              <Select
+                labelId="demo-multiple-checkbox-label"
+                id="demo-multiple-checkbox"
+                multiple
+                value={isoCountry}
+                onChange={handleChange}
+                input={<OutlinedInput label="Tag" />}
+                renderValue={(selected) => selected.join(", ")}
+                MenuProps={MenuProps}
+              >
+                {countries.map((data) => (
+                  <MenuItem key={data.id} value={data.iso_code_2}>
+                    <Checkbox
+                      checked={isoCountry.indexOf(data.iso_code_2) > -1}
+                    />
+                    <img src={data.flagUrl} alt="" /> &nbsp; &nbsp;
+                    <ListItemText primary={data.name} />
+                  </MenuItem>
+                ))}
+              </Select>
+            )}
+
             <br />
             <br />
             <input type="file" onChange={onChange} />

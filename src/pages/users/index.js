@@ -104,12 +104,12 @@ const ListUsers = () => {
           <TableHead>
             <TableRow>
               <TableCell align="center">image</TableCell>
-              <TableCell align="center">id</TableCell>
+              <TableCell align="center">device id</TableCell>
               <TableCell align="center">firstname</TableCell>
               <TableCell align="center">lastname</TableCell>
               <TableCell align="center">created at</TableCell>
               <TableCell align="center">user</TableCell>
-              <TableCell align="center"></TableCell>
+              <TableCell align="center">mobile number</TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
               <TableCell align="center"></TableCell>
@@ -125,13 +125,14 @@ const ListUsers = () => {
                 <TableCell align="center">
                   <img src={row.fileUrl} alt="" width="150" />
                 </TableCell>
-                <TableCell align="center">{row.id}</TableCell>
+                <TableCell align="center">{row.devices[row.devices.length - 1]?.device_id}</TableCell>
                 <TableCell align="center">{row.firstname}</TableCell>
                 <TableCell align="center">{row.lastname}</TableCell>
                 <TableCell align="center">
-                  {Moment(row.createdAt).format("dd/mm/yyyy")}
+                {Moment(row.createdAt).format("MMMM Do YYYY")}
                 </TableCell>
                 <TableCell align="center">{row.email}</TableCell>
+                <TableCell align="center">{row.phone}</TableCell>
                 <TableCell align="center">
                   <button
                     onClick={() => {

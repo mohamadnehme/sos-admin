@@ -112,7 +112,7 @@ const TrackDevice = () => {
     return () => {
       clearInterval(changeIntervalRef.current);
     };
-  }, [REACT_APP_API_ENDPOINT, dispatch, id, navigate, user.token]);
+  }, [REACT_APP_API_ENDPOINT, dispatch, id, navigate, user]);
 
   return (
     <>
